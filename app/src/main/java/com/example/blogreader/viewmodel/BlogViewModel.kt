@@ -12,17 +12,26 @@ class BlogViewModel : ViewModel() {
     private val _blogs = MutableStateFlow<List<BlogPost>>(emptyList())
     val blogs: StateFlow<List<BlogPost>> = _blogs
 
+    private var currentPage = 1
+    private val perPage = 10
+
     init {
         fetchBlogs()
     }
 
-    private fun fetchBlogs() {
+    fun fetchBlogs() {
         viewModelScope.launch {
             try {
-                _blogs.value = RetrofitInstance.api.getBlogPosts()
+                val newBlogs = RetrofitInstance.api.getBlogPosts(perPage, currentPage)
+                _blogs.value = _blogs.value + newBlogs
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun loadNextPage() {
+        currentPage++
+        fetchBlogs()
     }
 }
